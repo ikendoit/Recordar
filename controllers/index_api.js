@@ -24,7 +24,7 @@ var pgp = require("pg-promise")(initOptions);
 var con = {
     user: config.user,
 		host: config.host,
-		port: '5432',
+		port: config.port,
     password: config.psql,
     database: config.db
 };

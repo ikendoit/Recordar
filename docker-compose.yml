@@ -1,4 +1,4 @@
-version: "3" 
+version: "3"
 
 services: 
   app: 
@@ -11,6 +11,8 @@ services:
         -   db 
     links: 
         - db
+    volumes: 
+        - .:/recordar
   db:
     build: 
       context: ./sql/
@@ -20,6 +22,8 @@ services:
     environment: 
         -   POSTGRES_USER=${RECORDAR_PSQL_USER}
         -   POSTGRES_PASSWORD=${RECORDAR_PSQL_PASSWORD}
+        -   POSTGRES_PORT=${RECORDAR_PSQL_PORT}
         -   POSTGRES_DB=recordar
+    container_name: "recordar_db"
     ports: 
-        -   "5430:5432"
+        - "5430:5432"

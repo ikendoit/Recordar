@@ -1,6 +1,7 @@
 const chai = require("chai");
 const {apiTest} = require("./lib/apiTest");
 const expect = chai.expect;
+const app = require('../index.js');
 
 describe("GRAPH QL NOTES DATA", ()=>{
 

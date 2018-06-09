@@ -1,5 +1,7 @@
 'use strict';
 
+const {validateKeys} = require("./utils/validate");
+
 //GRAPH QL ********************************************************
 
 //NOTE Format:
@@ -61,6 +63,7 @@ function summarize(notes){
 */
 exports.get_all_notes_graphql = async (arg, db) => {
 
+	console.log("querying notes");
 	return await db.any("select a.*, c.cat_name from categories_act a, categories c where c.cat_id=a.cat_id and c.user_id=a.user_id and c.user_id ='"+arg.id+"'")
 		.then((resJSON) => {
 			return summarize(resJSON);
@@ -111,6 +114,7 @@ exports.get_from_types = async (arg,db)=> {
 
 exports.insert_all_notes = async (arg, db) => {
 
+	console.log("inserting notes");
 	let hashes = [];
     if (arg.flag === "true"){
         await db.any("delete from categories where user_id='"+arg.user_id+"'");
