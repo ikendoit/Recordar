@@ -1,5 +1,7 @@
 # Recordar
-When note taking and source control have a child.
+
+*** PRESENTATION COMING SOON ***
+When note taking and source control get combined.
 
 Graphql server with postgresql, nodejs, reactJS and Express 
 
