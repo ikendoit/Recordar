@@ -95,15 +95,15 @@ exports.get_from_types = async (arg,db)=> {
 	let notes = arg.notes;
 
 	//craft the query string
-	let query = "false ";
+	let query = "";
 	for (let note of notes){
-		query+= "OR (a.cat_id='"+note.cat_id+"' AND a.type IN (''";	
+		query+= "and a.cat_id='"+note.cat_id+"' AND a.type IN (''";	
 		query+=note.data.reduce((all, type)=> all+",'"+type.type+"'", "");
 		query+= ")) ";
 	}
-	return await db.any("select DISTINCT a.*, c.cat_name from categories_act a, categories c where a.cat_id=c.cat_id and a.user_id=c.user_id and a.cat_id=c.cat_id and c.user_id='"+arg.id+"' and ("+query+")")
+	return await db.any("select DISTINCT a.*, c.cat_name from categories_act a, categories c where a.cat_id=c.cat_id and a.user_id=c.user_id and a.cat_id=c.cat_id and c.user_id='"+arg.id+"'"+query)
 		.then((res) => {
-			return summarize(res);;
+			return summarize(res);
 		})
 		.catch((err)=> {
 			console.log("notesjs.18: "+err);

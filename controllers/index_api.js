@@ -90,7 +90,7 @@ function cors_localhost(req,res,next){
 //TODO: change userID from Int to String jwt
 //Mutation return Hash is temporary, needs changing to (flag) or (message) or any other resolution
 var notes_ql = buildSchema('\
-    type Query {note(id: String!): [Note], \
+    type Query {notes(id: String!): [Note], \
       notes_cat_id(cat_ids: [String]!, id: String!): [Note]\
 			notes_type(notes: [Note_Type]!, id:String!): [Note]\
 		}, \
@@ -105,8 +105,7 @@ var notes_ql = buildSchema('\
 	');
 
 var root = {
-	note: (arg) => notes.get_all_notes_graphql(arg,db),
-	notes: (arg) => notes.get_select_notes_graphql(arg,db),
+	notes: (arg) => notes.get_all_notes_graphql(arg,db),
 	notes_type: (arg) => notes.get_from_types(arg,db),
 	all_notes_input: (arg) => notes.insert_all_notes(arg,db),
 };
