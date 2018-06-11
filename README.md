@@ -121,3 +121,44 @@ with:
 		content
 		hash
 }
+
+##### Mutation: change query: 
+
+@body: {
+
+	query: "mutation ($Notes: [Note_Input]!, $Flag: String!, $ID: String!) {\
+		
+		all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}  \
+   
+
+	} " (string) 
+
+	variables: {}
+		Notes : [<objectNotes_type>] 
+		ID: int-userID
+		Flag: boolean - should this override server ?
+}
+
+@return: { notes_type : [<note_types>] }
+
+with: 
+
+<objectNotes_type> : {
+	cat_name 
+	cat_id 
+	data: [] 
+		type: string
+}
+
+<query_fields> "cat_id, cat_name, data {type date content hash } " : string
+
+<objectNotes_type> {
+	cat_id : int 
+	cat_name: string 
+	data: {}
+	type
+		date
+		content
+		hash
+}
+

@@ -20,7 +20,6 @@ const {validateKeys} = require("./utils/validate");
 	Generate summarized data for graphql 'Note' data type
 */
 function summarize(notes){
-	//generate summarized data to reduce SQL work load: 
 	let summ = [];
 	for (let note of notes){
 		let contained = false;
@@ -97,7 +96,7 @@ exports.get_from_types = async (arg,db)=> {
 	//craft the query string
 	let query = "";
 	for (let note of notes){
-		query+= "and a.cat_id='"+note.cat_id+"' AND a.type IN (''";	
+		query+= " and a.cat_id='"+note.cat_id+"' AND a.type IN (''";	
 		query+=note.data.reduce((all, type)=> all+",'"+type.type+"'", "");
 		query+= ")) ";
 	}
