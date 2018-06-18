@@ -2,7 +2,6 @@ const chai = require("chai");
 const chaiHttp = require("chai-http");
 const request = require("request");
 const expect = chai.expect;
-const app = require('../../index.js');
 chai.use(chaiHttp);
 
 const host = process.env.RECORDAR_HOST_URL;
@@ -17,30 +16,53 @@ const host = process.env.RECORDAR_HOST_URL;
 						response: call back function to check eg: (err,res)=> {}
 */
 exports.apiTest = (dataTest,done) => {
-		if ( "post" in dataTest ){
-			return chai.request(host)
-				.post(dataTest.route)
-				.send(dataTest.post)
-				.end((err,res)=> {
 
-					if ( "response" in dataTest ){
-						dataTest.response(err,res);
-					}
-					expect(res.statusCode).to.equal(dataTest.code);
-					done();
-				})
-		} else {
+	const params = {
+
+		route: host+dataTest.route,
+
+		body: {
+			body: JSON.stringify(dataTest.body || {}),
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+		},
+
+		callBack: (err,res,body) => {
+			if (err) {
+				console.log(err)
+				return;
+			}
 			
-			return chai.request(host)
-				.get(dataTest.route)
-				.end((err,res)=> {
-
-					if ( "response" in dataTest ){
-						dataTest.response(err,res);
-					}
-					expect(res.statusCode).to.equal(dataTest.code);
-					done();
-				})
-
+			if ( "response" in dataTest ){
+				dataTest.response(res,body);
+			}
+			expect(res.statusCode).to.equal(dataTest.code);
+			done();
 		}
+
+	}
+
+	switch(dataTest.method.toUpperCase()){
+		case "GET" : 
+			request.get(params.route, params.callBack);
+			break;
+		case "POST":
+			request.post(params.route, params.body, params.callBack);
+			break;
+		case "PUT":
+			request.put(params.route, params.body, params.callBack);
+			break;
+		case "DELETE":
+			request.delete(params.route, params.body, params.callBack);
+			break;
+		case "PATCH":
+			request.patch(params.route, params.body, params.callBack);
+			break;
+		default: 
+			request.get(params.route, params.callBack);
+			return;
+	}
+
 }

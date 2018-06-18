@@ -20,10 +20,12 @@ const {validateKeys} = require("./utils/validate");
 	Generate summarized data for graphql 'Note' data type
 */
 function summarize(notes){
+
 	let summ = [];
 	for (let note of notes){
 		let contained = false;
 		for (let cat of summ){
+
 			//check if summarized array already has this cat_name and cat_id
 			if (cat.cat_id === note.cat_id && cat.cat_name === note.cat_name){
 				cat.data.push({
@@ -52,8 +54,11 @@ function summarize(notes){
 				]
 			});
 		}
+
 	}
+
 	return summ;
+
 }
 
 //*********************************** QUERIES
@@ -62,14 +67,22 @@ function summarize(notes){
 */
 exports.get_all_notes_graphql = async (arg, db) => {
 
-	console.log("querying notes");
-	return await db.any("select a.*, c.cat_name from categories_act a, categories c where c.cat_id=a.cat_id and c.user_id=a.user_id and c.user_id ='"+arg.id+"'")
-		.then((resJSON) => {
-			return summarize(resJSON);
-		})
-		.catch((err)=> {
-			console.log("notejs.19: "+err);
-		});
+	try {
+		validateKeys(["id"], arg);
+		return await db.any("select a.*, c.cat_name from categories_act a, categories c where c.cat_id=a.cat_id and c.user_id=a.user_id and c.user_id ='"+arg.id+"'")
+			.then((resJSON) => {
+				return summarize(resJSON);
+			})
+			.catch((err)=> {
+				console.log("problem querying server");
+				console.log(args);
+				return [{"error": "error fetching data"}];
+			});
+	} catch(err) { 
+		console.log(err);
+		throw new Errors("invalid user id");
+	}
+
 }
 
 
@@ -106,6 +119,7 @@ exports.get_from_types = async (arg,db)=> {
 		})
 		.catch((err)=> {
 			console.log("notesjs.18: "+err);
+			return err;
 		});
 }
 
@@ -113,16 +127,22 @@ exports.get_from_types = async (arg,db)=> {
 
 exports.insert_all_notes = async (arg, db) => {
 
-	console.log("inserting notes");
-	let hashes = [];
-    if (arg.flag === "true"){
-        await db.any("delete from categories where user_id='"+arg.user_id+"'");
-        await db.any("delete from categories_act where user_id='"+arg.user_id+"'");
-    }
-	for (let note of arg.notes){
-		hashes.push(await insert_note(note, arg.user_id, db));
+	try {
+		console.log("inserting notes");
+		validateKeys(["notes", "user_id", "flag"], arg);
+		let hashes = [];
+			if (arg.flag === "true"){
+					await db.any("delete from categories where user_id='"+arg.user_id+"'");
+					await db.any("delete from categories_act where user_id='"+arg.user_id+"'");
+			}
+		for (let note of arg.notes){
+			hashes.push(await insert_note(note, arg.user_id, db));
+		}
+		return hashes;
+	} catch(err) {
+		console.log("insert all error ");
+		return err;
 	}
-	return hashes;
 }
 
 /*
@@ -143,27 +163,30 @@ exports.insert_all_notes = async (arg, db) => {
 		cat_id: fake cat_id, temporary TODO
 */
 async function insert_note(note,user_id,db){
-	// insert new category and name: 
-	await db.any("update categories set cat_name='"+note.cat_name+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' ")
-		.catch((err)=> { 
-		});
-	await db.any("insert into categories(cat_id, cat_name, user_id) values('"+note.cat_id+"','"+note.cat_name+"','"+user_id+"')")
-		.catch((err)=> { 
-		});
-	// for every act of each note: add it in 
-	for (let data of note.data){
-		//parse data.date: 
-		if ( !/^[0-9]{4}\-[0-9]+\-[0-9]+ [0-9]+\:[0-9]+\:[0-9]+/.test(data.date)){
-			console.log("nope");
-			console.log(data.date);
-			return {"hash": "hashable, invalid date", "cat_id":"wrong date dude"};
+
+	try {
+
+		validateKeys(["cat_name", "cat_id", "data"], note);
+		// insert new category and name: 
+		await db.any("update categories set cat_name='"+note.cat_name+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' ")
+		await db.any("insert into categories(cat_id, cat_name, user_id) values('"+note.cat_id+"','"+note.cat_name+"','"+user_id+"')")
+
+		// for every act of each note: add it in 
+		for (let data of note.data){
+			//parse data.date: 
+			if ( !/^[0-9]{4}\-[0-9]+\-[0-9]+ [0-9]+\:[0-9]+\:[0-9]+/.test(data.date)){
+				console.log(`nope ${data.date}`);
+				return {"hash": "hashable, invalid date", "cat_id":"wrong date dude"};
+			}
+			await db.any("update categories_act set content='"+data.content+"', hash='"+data.hash+"', date='"+data.date+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' and type='"+data.type+"' ")
+				.catch((err)=> { 
+				});
+			await db.any("insert into categories_act(cat_id, type, content, hash, date,user_id) values('"+note.cat_id+"','"+data.type+"','"+data.content+"','"+data.hash+"','"+data.date+"','"+user_id+"')")
+				.catch((err)=> { 
+				});
 		}
-		await db.any("update categories_act set content='"+data.content+"', hash='"+data.hash+"', date='"+data.date+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' and type='"+data.type+"' ")
-			.catch((err)=> { 
-			});
-		await db.any("insert into categories_act(cat_id, type, content, hash, date,user_id) values('"+note.cat_id+"','"+data.type+"','"+data.content+"','"+data.hash+"','"+data.date+"','"+user_id+"')")
-			.catch((err)=> { 
-			});
+		return {"hash": "hashable until replace works", "cat_id": note.cat_id};
+	} catch(err) { 
+		return {"error": "error inserting notes"};
 	}
-	return {"hash": "hashable until replace works", "cat_id": "any cat you want, cat heaven"};
 }

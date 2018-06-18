@@ -1,3 +1,10 @@
+/*
+	the old rest API version. 
+	graphql: research: 
+		error handling 
+		code throwing 
+
+*/
 exports.get_all_notes = (req,res,db) => {
 	console.log(req.body.id);
 	db.any("select a.*, d.cat_name from categories_act a, categories c, categories_desc d where a.cat_id=d.cat_id and d.cat_id=c.cat_id and c.user_id ="+req.body.id)

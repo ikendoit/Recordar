@@ -1,38 +1,43 @@
 //init vars***********************
-var express = require("express");
-var router = express.Router();
-var Promise = require("promise");
-var body = require("body-parser");
-var { GraphQLString,
+const express = require("express");
+const router = express.Router();
+const Promise = require("promise");
+const body = require("body-parser");
+const _ = require("lodash");
+//graphql ***********************
+const { GraphQLString,
 		GraphQLID,
 		GraphQLInputObjectType,
 		GraphQLObjectType,
 		buildSchema
 	} = require('graphql');
-var express_graphql = require("express-graphql");
+const schemas = require("../schemas/index.js");
+schemas.getNotesSchema();
+
+const express_graphql = require("express-graphql");
 
 //jwt ***********************
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
-var config = require("../config/config");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const config = require("../config/config");
 
 //psql***********************
-var initOptions = {
+const initOptions = {
     promiseLib: Promise
 };
-var pgp = require("pg-promise")(initOptions);
-var con = {
+const pgp = require("pg-promise")(initOptions);
+const con = {
     user: config.user,
 		host: config.host,
 		port: config.port,
     password: config.psql,
     database: config.db
 };
-var db = pgp(con);
+const db = pgp(con);
 
 //models***********************
-var user = require("../models/user");
-var notes = require("../models/notes");
+const user = require("../models/user");
+const notes = require("../models/notes");
 
 //middlewares***********************
 router.use(body());
@@ -40,10 +45,10 @@ router.use(body());
 function verify_user(req,res,next){
 	let token = req.body.token; 
 	if (!token){
-		return res.status(404).json({"flag": "false", "message": "User not Authenticated, please re-login"});
+		return res.status(400).json({"flag": "false", "message": "User not Authenticated, please re-login"});
 	} else {
 		jwt.verify(token, config.secret, function(err, decoded){
-			if (err) return res.status(404).json({"flag": "false", "message": "User not Authenticated, please re-login"});
+			if (err) return res.status(400).json({"flag": "false", "message": "User not Authenticated, please re-login"});
 			req.body.id = decoded.id;
 			next();
 		});
@@ -51,12 +56,20 @@ function verify_user(req,res,next){
 }
 
 function verify_graphql_vars(req,res,next){
+  if (_isEmpty(req.body)) {
+    res.status(400).json({"error": "invalid data to graphql"});
+  }
+
+	if (req.body.variables.ID === 1 ){
+		next();
+	}
+
 	let token = req.body.variables.ID; 
 	if (!token){
-		return res.status(404).json({"flag": "false", "message": "User not Authenticated, please re-login"});
+		return res.status(400).json({"flag": "false", "message": "User not Authenticated, please re-login"});
 	} else {
 		jwt.verify(token, config.secret, function(err, decoded){
-			if (err) return res.status(404).json({"flag": "false", "message": "User not Authenticated, please re-login"});
+			if (err) return res.status(400).json({"flag": "false", "message": "User not Authenticated, please re-login"});
 			req.body.variables.ID=decoded.id;
 			next();
 		});
@@ -89,20 +102,7 @@ function cors_localhost(req,res,next){
 //GRAPHQL SET UP
 //TODO: change userID from Int to String jwt
 //Mutation return Hash is temporary, needs changing to (flag) or (message) or any other resolution
-var notes_ql = buildSchema('\
-    type Query {notes(id: String!): [Note], \
-      notes_cat_id(cat_ids: [String]!, id: String!): [Note]\
-			notes_type(notes: [Note_Type]!, id:String!): [Note]\
-		}, \
-		type Note {cat_id: String, cat_name: String, data: [Note_Action]},\
-		type Note_Action{ type: String, content: String, date: String,hash: String  }\
-		type Hash {cat_id: String,hash: String, date: String}\
-		input Note_Type {cat_id: String, cat_name: String, data: [Type_Data] }\
-		input Type_Data {type: String}\
-	type Mutation {all_notes_input(notes: [Note_Input]!, user_id: String!, flag: String!): [Hash] }\
-		input Note_Input { cat_id: String!, cat_name: String!, data: [Note_Data]! }\
-		input Note_Data {type: String!, content: String!, hash: String!, date:String! } \
-	');
+var notes_ql = buildSchema(schemas.getNotesSchema());
 
 var root = {
 	notes: (arg) => notes.get_all_notes_graphql(arg,db),
@@ -126,7 +126,7 @@ router.post("/user/register", function (req, res) {
 router.use('/notes',cors_localhost, verify_graphql_vars, express_graphql({
 	schema: notes_ql, 
 	rootValue: root, 
-	graphiql: true
+	graphiql: false
 }));
 
 module.exports = router;

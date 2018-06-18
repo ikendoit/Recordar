@@ -139,26 +139,16 @@ with:
 		Flag: boolean - should this override server ?
 }
 
-@return: { notes_type : [<note_types>] }
+@return: {  [<note_data>] }
 
 with: 
 
-<objectNotes_type> : {
-	cat_name 
-	cat_id 
-	data: [] 
-		type: string
-}
-
-<query_fields> "cat_id, cat_name, data {type date content hash } " : string
-
-<objectNotes_type> {
+<note_data> : {
 	cat_id : int 
 	cat_name: string 
 	data: {}
-	type
+		type
 		date
 		content
 		hash
 }
-
