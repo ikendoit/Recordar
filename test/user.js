@@ -22,8 +22,6 @@ describe("USER TESTING", ()=>{
 				route: "/api/user/login", 
 				body: {
 				},
-				response: (err,res) => {
-				},
 				code: 400, 
 			},done);
 
@@ -37,8 +35,6 @@ describe("USER TESTING", ()=>{
 				body: {
 					username: "test1",
 					password: "' or '1'='1"
-				},
-				response: (err, res) => {
 				},
 				code: 400, 
 			},done);
@@ -54,8 +50,6 @@ describe("USER TESTING", ()=>{
 					username: "tetditmanh",
 					password: "' ohfdsafasdfhr"
 				},
-				response: (err, res) => {
-				},
 				code: 400, 
 			},done);
 
@@ -69,8 +63,6 @@ describe("USER TESTING", ()=>{
 				body: {
 					username: "test1",
 					password: "' hfdsafasdfhr"
-				},
-				response: (err, res) => {
 				},
 				code: 400, 
 			},done);
@@ -87,8 +79,6 @@ describe("USER TESTING", ()=>{
 			apiTest({
 				method: "get",
 				route: "/api/user/regsiter", 
-				response: (err,res) => {
-				},
 				code: 404, 
 			},done);
 

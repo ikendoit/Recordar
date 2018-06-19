@@ -34,7 +34,6 @@ describe("NOTES TESTING", ()=>{
 
 	});
 
-
 	describe("MUTATION", ()=>{
 
 		it('POST /api/notes, mutation of empty notes, should return 400 ', (done)=> {
