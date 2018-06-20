@@ -14,21 +14,30 @@ exports.validateKeys = (arrKeys, objectCheck) => {
 		throw {code: 400, errorMessage: 'Invalid Data'};
 	}
 
-	return this.sanitizeValues(arrKeys, objectCheck);
+	return this.sanitizeValues(objectCheck);
 
 }
 
 /*
 	sanitize input in a key-value object
-	@params: arrKeys: array of keys to check
-					 objectCheck: object to check for keys existence
-	@return: new object with sanitized values corresponding to key list
+	recursively go through every string value in the object, escape them
+	@params: objectCheck: array of keys to check
+	@return: new object with sanitized values
 */
-exports.sanitizeValues = (arrKeys, objectCheck) => {
+exports.sanitizeValues = (objectCheck) => {
 
-	for (let key of arrKeys){
-		objectCheck[key] = escaper(objectCheck[key]);
+	if (typeof(objectCheck) !== "object") return objectCheck;
+
+	for (let key of Object.keys(objectCheck)){
+		let currentKeyVal = objectCheck.key;
+		if (typeof(currentKeyVal) === "object"){
+			this.sanitizeValues(currentKeyVal)
+		} else {
+			//objectCheck.key = escaper(objectCheck.key);
+			objectCheck.key = "testing in progress";
+		}
 	}
+	console.log(objectCheck);
 	return objectCheck;
 
 }

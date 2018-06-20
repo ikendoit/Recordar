@@ -1,4 +1,5 @@
 const { validateKeys } = require("./utils/validate");
+const { checkConstraints } = require("./utils/constrainter");
 
 /*
 	login function 
@@ -9,6 +10,13 @@ exports.login = async (req,res,jwt,config,db) => {
 
 	try {
 
+		if ( !checkConstraints(req.body, {
+						username: ["is_string", "no_special"],
+						password: ["no_special"]
+					})
+			) {
+			throw new Error("Invalid username and password");
+		};
 		req.body = validateKeys(["password", "username"], req.body);
 		db.any("select * from users where username='"+req.body.username+"' and password='"+req.body.password+"'")
 			.then(function(user){
@@ -33,6 +41,15 @@ exports.register = async (req,res,jwt,config,db) => {
 
 	try {
 		req.body = validateKeys(["password", "username", "email"], req.body);
+
+		if ( !checkConstraints(req.body, {
+						username: ["is_string", "no_special"],
+						password: ["no_special"],
+						email: ["is_string"],
+					})
+			) {
+			throw new Error("Invalid username and password");
+		};
 
 		if (await checkUsernameExists(db, req.body.username)){
 			throw {code:400, error:"Username already exist"};

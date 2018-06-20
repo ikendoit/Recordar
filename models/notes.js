@@ -71,11 +71,11 @@ exports.get_all_notes_graphql = async (arg, db) => {
 		validateKeys(["id"], arg);
 		return await db.any("select a.*, c.cat_name from categories_act a, categories c where c.cat_id=a.cat_id and c.user_id=a.user_id and c.user_id ='"+arg.id+"'")
 			.then((resJSON) => {
+				console.log(resJSON);
 				return summarize(resJSON);
 			})
 			.catch((err)=> {
-				console.log("problem querying server");
-				console.log(args);
+				console.log(err);
 				return [{"error": "error fetching data"}];
 			});
 	} catch(err) { 
@@ -136,11 +136,12 @@ exports.insert_all_notes = async (arg, db) => {
 					await db.any("delete from categories_act where user_id='"+arg.user_id+"'");
 			}
 		for (let note of arg.notes){
-			hashes.push(await insert_note(note, arg.user_id, db));
+			console.log(note);	
+		//	hashes.push(await insert_note(note, arg.user_id, db));
 		}
 		return hashes;
 	} catch(err) {
-		console.log("insert all error ");
+		console.log(err);
 		return err;
 	}
 }
@@ -164,9 +165,8 @@ exports.insert_all_notes = async (arg, db) => {
 */
 async function insert_note(note,user_id,db){
 
-	try {
-
-		validateKeys(["cat_name", "cat_id", "data"], note);
+	try { 
+		validateKeys(["cat_name", "cat_id", "cat_name"], note);
 		// insert new category and name: 
 		await db.any("update categories set cat_name='"+note.cat_name+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' ")
 		await db.any("insert into categories(cat_id, cat_name, user_id) values('"+note.cat_id+"','"+note.cat_name+"','"+user_id+"')")
@@ -179,14 +179,11 @@ async function insert_note(note,user_id,db){
 				return {"hash": "hashable, invalid date", "cat_id":"wrong date dude"};
 			}
 			await db.any("update categories_act set content='"+data.content+"', hash='"+data.hash+"', date='"+data.date+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' and type='"+data.type+"' ")
-				.catch((err)=> { 
-				});
 			await db.any("insert into categories_act(cat_id, type, content, hash, date,user_id) values('"+note.cat_id+"','"+data.type+"','"+data.content+"','"+data.hash+"','"+data.date+"','"+user_id+"')")
-				.catch((err)=> { 
-				});
 		}
+
 		return {"hash": "hashable until replace works", "cat_id": note.cat_id};
-	} catch(err) { 
-		return {"error": "error inserting notes"};
+	} catch(err) {
+		throw err;
 	}
 }
