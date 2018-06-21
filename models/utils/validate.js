@@ -26,18 +26,16 @@ exports.validateKeys = (arrKeys, objectCheck) => {
 */
 exports.sanitizeValues = (objectCheck) => {
 
-	if (typeof(objectCheck) !== "object") return objectCheck;
+	if (typeof(objectCheck) !== "object") return escaper(objectCheck);
 
 	for (let key of Object.keys(objectCheck)){
-		let currentKeyVal = objectCheck.key;
+		let currentKeyVal = objectCheck[key];
 		if (typeof(currentKeyVal) === "object"){
-			this.sanitizeValues(currentKeyVal)
+			currentKeyVal = this.sanitizeValues(currentKeyVal)
 		} else {
-			//objectCheck.key = escaper(objectCheck.key);
-			objectCheck.key = "testing in progress";
+			objectCheck[key] = escaper(objectCheck[key]);
 		}
 	}
-	console.log(objectCheck);
 	return objectCheck;
 
 }

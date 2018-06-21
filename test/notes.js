@@ -28,8 +28,68 @@ describe("NOTES TESTING", ()=>{
 					} 
 				},
 				response: (res) => {
+					console.log(res.body);
+					console.log(res.data);
+					console.log(res.notes);
+					//expect(res.notes.length > 1).to.be.true;
 				},
 				code: 200, 
+			},done);
+
+		});
+
+		it('POST /api/notes,limited fields should return 200 ', (done)=> {
+
+			apiTest({
+				method: "post",	
+				route: "/api/notes", 
+				body: {
+					query: "query($ID:String!) { notes(id: $ID){cat_name,data { type }} }",
+					variables: {
+					} 
+				},
+				response: (res) => {
+					//expect(res.notes[0].cat_id === undefined).to.be.true;
+				},
+				code: 200, 
+			},done);
+
+		});
+
+		it('POST /api/notes,unknown fields should return 400 ', (done)=> {
+
+			apiTest({
+				method: "post",	
+				route: "/api/notes", 
+				body: {
+					query: "query($ID:String!) { notes(id: $ID){ cat_age, data { typii, data }} }",
+					variables: {
+						ID: 1 
+					} 
+				},
+				response: (res) => {
+				},
+				code: 400, 
+			},done);
+
+		});
+
+		it('POST /api/notes,invalid user token should return 400 ', (done)=> {
+
+			apiTest({
+				method: "post",	
+				route: "/api/notes", 
+				body: {
+					query: "query($ID:String!) { notes(id: $ID){ cat_age, data { typii, data }} }",
+					// note: the middleware only allow userID=1 to pass, else we need a valid JWT
+					variables: {
+						ID: 5 
+					} 
+				},
+				response: (res) => {
+					console.log(res.error);
+				},
+				code: 400, 
 			},done);
 
 		});
@@ -40,7 +100,7 @@ describe("NOTES TESTING", ()=>{
 
 		it('POST /api/notes, mutation of empty notes, should return 200 ', (done)=> {
 
-			let notes = [
+			let validNotes = [
 				{
 					"cat_id": "AA844",
 					"cat_name": "Educational",
@@ -66,19 +126,16 @@ describe("NOTES TESTING", ()=>{
 				route: "/api/notes", 
 				body: {
 					variables: { 
-						Notes : [{}], 
-						Flag: false,
+						Notes : [], 
+						Flag: true,
 						ID: 1,
 					}, 
 					query: "mutation($Notes: [Note_Input]!, $Flag: String!, $ID: String!) { all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}}",
-				},
-				response: (res)=> {
 				},
 				code: 200, 
 			},done);
 
 		});
-
-	});
+});
 
 });

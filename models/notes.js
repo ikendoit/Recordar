@@ -71,7 +71,6 @@ exports.get_all_notes_graphql = async (arg, db) => {
 		validateKeys(["id"], arg);
 		return await db.any("select a.*, c.cat_name from categories_act a, categories c where c.cat_id=a.cat_id and c.user_id=a.user_id and c.user_id ='"+arg.id+"'")
 			.then((resJSON) => {
-				console.log(resJSON);
 				return summarize(resJSON);
 			})
 			.catch((err)=> {
@@ -128,21 +127,19 @@ exports.get_from_types = async (arg,db)=> {
 exports.insert_all_notes = async (arg, db) => {
 
 	try {
-		console.log("inserting notes");
 		validateKeys(["notes", "user_id", "flag"], arg);
 		let hashes = [];
 			if (arg.flag === "true"){
-					await db.any("delete from categories where user_id='"+arg.user_id+"'");
-					await db.any("delete from categories_act where user_id='"+arg.user_id+"'");
+				await db.any("DELETE FROM categories WHERE user_id='"+arg.user_id+"'");
+				await db.any("DELETE FROM categories_act WHERE user_id='"+arg.user_id+"'");
 			}
 		for (let note of arg.notes){
-			console.log(note);	
-		//	hashes.push(await insert_note(note, arg.user_id, db));
+			hashes.push(await insert_note(note, arg.user_id, db));
 		}
 		return hashes;
 	} catch(err) {
 		console.log(err);
-		return err;
+		throw err;
 	}
 }
 
@@ -166,24 +163,36 @@ exports.insert_all_notes = async (arg, db) => {
 async function insert_note(note,user_id,db){
 
 	try { 
-		validateKeys(["cat_name", "cat_id", "cat_name"], note);
+		validateKeys(["cat_name", "cat_id"], note);
 		// insert new category and name: 
-		await db.any("update categories set cat_name='"+note.cat_name+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' ")
-		await db.any("insert into categories(cat_id, cat_name, user_id) values('"+note.cat_id+"','"+note.cat_name+"','"+user_id+"')")
+		await db.any(`\
+			INSERT INTO categories(cat_id, cat_name, user_id) VALUES \
+				('${note.cat_id}','${note.cat_name}','${user_id}') \
+			ON CONFLICT ON CONSTRAINT categories_pkey \
+				DO UPDATE SET cat_name='${note.cat_name}' \
+			`)
 
 		// for every act of each note: add it in 
 		for (let data of note.data){
 			//parse data.date: 
 			if ( !/^[0-9]{4}\-[0-9]+\-[0-9]+ [0-9]+\:[0-9]+\:[0-9]+/.test(data.date)){
 				console.log(`nope ${data.date}`);
-				return {"hash": "hashable, invalid date", "cat_id":"wrong date dude"};
+				throw new Error("Invalid Time Format");
 			}
-			await db.any("update categories_act set content='"+data.content+"', hash='"+data.hash+"', date='"+data.date+"' where user_id='"+user_id+"' and cat_id='"+note.cat_id+"' and type='"+data.type+"' ")
-			await db.any("insert into categories_act(cat_id, type, content, hash, date,user_id) values('"+note.cat_id+"','"+data.type+"','"+data.content+"','"+data.hash+"','"+data.date+"','"+user_id+"')")
+			await db.any(`\
+					INSERT INTO categories_act(cat_id, type, content, hash, date,user_id) VALUES\
+						('${note.cat_id}','${data.type}','${data.content}','${data.hash}','${data.date}','${user_id}')\
+					ON CONFLICT(cat_id, user_id, type) \
+						DO \
+							UPDATE SET content='${data.content}', hash='${data.hash}', date='${data.date}'\
+				`)
 		}
 
-		return {"hash": "hashable until replace works", "cat_id": note.cat_id};
+		return {"hash": "temp_hash, not_for_any_feature", "cat_id": note.cat_id};
 	} catch(err) {
 		throw err;
 	}
 }
+
+//*************************************************************
+

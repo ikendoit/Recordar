@@ -64,7 +64,6 @@ function verify_graphql_vars(req,res,next){
 	}
 
   if (_.isEmpty(req.body) || req.body === "{}") {
-		console.log("oops, don't see anything");
     res.status(400).json({"error": "invalid user token"});
 		throw new Error("Invalid Data Input, need user token");
   }

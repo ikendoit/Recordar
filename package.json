@@ -34,6 +34,10 @@
     "mocha": "^5.2.0"
   },
   "scripts": {
+		"down": "docker-compose down",
+		"build": "docker-compose build",
+		"up": "docker-compose up",
+		"psql-test": "docker exec -it --user postgres $(docker ps -aqf name=recordar_db) psql --dbname=recordar",
     "start": "nodemon index.js",
     "test": "mocha ./test/*"
   },
