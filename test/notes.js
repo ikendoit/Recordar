@@ -28,10 +28,7 @@ describe("NOTES TESTING", ()=>{
 					} 
 				},
 				response: (res) => {
-					console.log(res.body);
-					console.log(res.data);
-					console.log(res.notes);
-					//expect(res.notes.length > 1).to.be.true;
+					expect(JSON.parse(res.body).data.notes.length > 1).to.be.true;
 				},
 				code: 200, 
 			},done);
@@ -49,7 +46,8 @@ describe("NOTES TESTING", ()=>{
 					} 
 				},
 				response: (res) => {
-					//expect(res.notes[0].cat_id === undefined).to.be.true;
+					expect(JSON.parse(res.body).data.notes[0].cat_id === undefined).to.be.true;
+					expect(JSON.parse(res.body).data.notes[0].cat_name === undefined).to.be.false;
 				},
 				code: 200, 
 			},done);
@@ -66,8 +64,6 @@ describe("NOTES TESTING", ()=>{
 					variables: {
 						ID: 1 
 					} 
-				},
-				response: (res) => {
 				},
 				code: 400, 
 			},done);
@@ -96,11 +92,8 @@ describe("NOTES TESTING", ()=>{
 
 	});
 
-	describe("MUTATION", ()=>{
-
-		it('POST /api/notes, mutation of empty notes, should return 200 ', (done)=> {
-
-			let validNotes = [
+	describe.only("MUTATION", ()=>{
+		let validNotes = [
 				{
 					"cat_id": "AA844",
 					"cat_name": "Educational",
@@ -121,6 +114,214 @@ describe("NOTES TESTING", ()=>{
 				}
 			];
 
+		it('POST /api/notes, mutation of invalid schema, should return 500 ', (done)=> {
+
+			const invalidSchema = [
+				{
+					"cat_name" : "kitty", 
+					"Age": 32, 
+					"correct": false
+				},
+				{
+					"cat_name" : "kty", 
+					"Age": 34, 
+					"correct": false
+				},
+				{
+					"cat_name" : "kty", 
+					"cat_id": 3, 
+					"data": [
+						{
+							"type": "correct",
+							"thingy": "false"
+						},
+						{
+							"type": "cor2", 
+							"false field": true
+						}
+					]
+				}
+			]
+
+			apiTest({
+				method: "post",
+				route: "/api/notes", 
+				response: (res)=> {
+					//console.log(res);
+				},
+				body: {
+					variables: { 
+						Notes : invalidSchema, 
+						Flag: true,
+						ID: 1,
+					}, 
+					query: "mutation($Notes: [Note_Input]!, $Flag: String!, $ID: String!) { all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}}",
+				},
+				code: 500, 
+			},done);
+
+		});
+
+		it('POST /api/notes, mutation of invalid schema, should return 500 ', (done)=> {
+
+			const invalidSchema = [
+				{
+					"cat_name" : "kitty", 
+					"Age": 32, 
+					"correct": false
+				},
+				{
+					"cat_name" : "kty", 
+					"Age": 34, 
+					"correct": false
+				},
+				{
+					"cat_name" : "kty", 
+					"cat_id": 3, 
+					"data": [
+						{
+							"type": "correct",
+							"thingy": "false"
+						},
+						{
+							"type": "cor2", 
+							"false field": true
+						}
+					]
+				}
+			]
+
+			apiTest({
+				method: "post",
+				route: "/api/notes", 
+				body: {
+					variables: { 
+						Notes : invalidSchema, 
+						Flag: true,
+						ID: 1,
+					}, 
+					query: "mutation($Notes: [Note_Input]!, $Flag: String!, $ID: String!) { all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}}",
+				},
+				code: 500, 
+			},done);
+
+		});
+
+		it('POST /api/notes, mutation of invalid characters, should return 500 ', (done)=> {
+
+			const invalidSchema = [
+				{
+					"cat_name" : "kitty", 
+					"cat_id" : 2, 
+					"data" : [
+						{
+						},
+						{
+						}
+					]
+				},
+				{
+					"cat_name" : "kty", 
+					"cat_id": 3, 
+					"data": [
+						{
+							"type": "correct",
+							"thingy": "false"
+						},
+						{
+							"type": "cor2", 
+							"false_field": true
+						}
+					]
+				}
+			]
+
+			apiTest({
+				method: "post",
+				route: "/api/notes", 
+				body: {
+					variables: { 
+						Notes : invalidSchema, 
+						Flag: true,
+						ID: 1,
+					}, 
+					query: "mutation($Notes: [Note_Input]!, $Flag: String!, $ID: String!) { all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}}",
+				},
+				code: 500, 
+			},done);
+
+		});
+
+		it('POST /api/notes, valid update, should return 200 ', (done)=> {
+
+			const validSchema = [
+				{
+					"cat_name" : "Educational", 
+					"cat_id" : "AA844", 
+					"data" : [
+						{
+							type: "a new note", 
+							content: "a content of a new note",
+							hash: "a random hash of course", 
+							date: "1972-12-21 11:12:12"
+						}
+					]
+				}
+			]
+
+			apiTest({
+				method: "post",
+				route: "/api/notes", 
+				body: {
+					variables: { 
+						Notes : validSchema, 
+						Flag: false,
+						ID: 1,
+					}, 
+					query: "mutation($Notes: [Note_Input]!, $Flag: String!, $ID: String!) { all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}}",
+				},
+				code: 200, 
+			},done);
+
+		});
+
+		it('POST /api/notes, valid create, should return 200 ', (done)=> {
+
+			const validSchema = [
+				{
+					"cat_name" : "New Nute", 
+					"cat_id" : "NN3113", 
+					"data" : [
+						{
+							type: "a new note", 
+							content: "a content of a new note",
+							hash: "a random hash of course", 
+							date: "1972-12-21 11:12:12"
+						}
+					]
+				}
+			]
+
+			apiTest({
+				method: "post",
+				route: "/api/notes", 
+				body: {
+					variables: { 
+						Notes : validSchema, 
+						Flag: false,
+						ID: 1,
+					}, 
+					query: "mutation($Notes: [Note_Input]!, $Flag: String!, $ID: String!) { all_notes_input(notes: $Notes, user_id:$ID, flag: $Flag) {hash}}",
+				},
+				code: 200, 
+			},done);
+
+		});
+
+
+
+		xit('POST /api/notes, mutation of empty notes, should erase all user\'s data return 200 ', (done)=> {
+
 			apiTest({
 				method: "post",
 				route: "/api/notes", 
@@ -136,6 +337,9 @@ describe("NOTES TESTING", ()=>{
 			},done);
 
 		});
-});
+
+
+
+	});
 
 });

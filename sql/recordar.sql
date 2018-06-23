@@ -33,6 +33,7 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
+DROP TABLE public.categories;
 CREATE TABLE public.categories (
     user_id integer NOT NULL,
     cat_id character varying(10) NOT NULL,
@@ -42,6 +43,7 @@ CREATE TABLE public.categories (
 
 --
 
+DROP TABLE public.categories_act;
 CREATE TABLE public.categories_act (
     cat_id character varying(10) NOT NULL,
     type character varying(20) NOT NULL,
@@ -54,6 +56,7 @@ CREATE TABLE public.categories_act (
 
 --
 
+DROP TABLE public.users;
 CREATE TABLE public.users (
     id integer NOT NULL,
     username character varying(30) NOT NULL,

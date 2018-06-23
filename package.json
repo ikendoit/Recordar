@@ -37,8 +37,11 @@
 		"down": "docker-compose down",
 		"build": "docker-compose build",
 		"up": "docker-compose up",
-		"psql-test": "docker exec -it --user postgres $(docker ps -aqf name=recordar_db) psql --dbname=recordar",
+		"build-up": "npm run build && npm run up",
+		"psql-test": "docker exec -it --user postgres $(docker ps -aqf name=recordar_db) psql recordar",
     "start": "nodemon index.js",
+		"reset-psql": "docker exec -it recordar_db psql -U kien recordar -f docker-entrypoint-initdb.d/recordar.sql",
+    "test-iso": "npm run reset-psql && mocha ./test/*",
     "test": "mocha ./test/*"
   },
   "author": "Ken Nguyen",

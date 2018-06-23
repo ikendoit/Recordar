@@ -109,9 +109,9 @@ function cors_localhost(req,res,next){
 var notes_ql = buildSchema(schemas.getNotesSchema());
 
 var root = {
-	notes: (arg) => notes.get_all_notes_graphql(arg,db),
-	notes_type: (arg) => notes.get_from_types(arg,db),
-	all_notes_input: (arg) => notes.insert_all_notes(arg,db),
+	notes: (arg,context) => notes.get_all_notes_graphql(arg,db),
+	notes_type: (arg,context) => notes.get_from_types(arg,db),
+	all_notes_input: (arg,context) => notes.insert_all_notes(arg,db),
 };
 
 //routing***********************
@@ -130,6 +130,7 @@ router.post("/user/register", function (req, res) {
 router.use('/notes',cors_localhost, verify_graphql_vars, express_graphql({
 	schema: notes_ql, 
 	rootValue: root, 
+	pretty: true,
 	graphiql: true
 }));
 

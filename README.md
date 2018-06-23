@@ -8,17 +8,26 @@ Graphql server with postgresql, nodejs, reactJS and Express
 
 Along with a homebrew diff algorithm
 
-This is the back-end for Recordar. Please Check for ReactJS version and React-Native for a full package.
+This is the back-end for Recordar. Please Check for ReactJS version and React-Native < Soon... > for a full package.
 
 ## GUIDE
 
-	1.	ask @ikendoit for the file .env, place it in root directory of the project
+	<ask @ikendoit for the file .env, place it in root directory of the project>
+	npm run build
+	npm run up
+	<check you localhost:8089/api/notes>
 
-	2.	`docker-compose build`
+## TESTING 
+	
+	npm run build
+	npm run up -d
+	<write your test, make new stuff>
+	npm run test
+		
 
-	3.	`docker-compose up`
+	<Note: if you make tests that change sql data:>
 
-	4.	check you localhost:8089
+	npm run reset-psql
 
 ## Documentation 
 
