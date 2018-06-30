@@ -18,17 +18,15 @@ This is the back-end for Recordar. Please Check for ReactJS version and React-Na
 	<check you localhost:8089/api/notes>
 
 ## TESTING 
-	
+```	
 	npm run build
 	npm run up -d
-	<write your test, make new stuff>
+	<write your test, make new stuff >
 	npm run test
+```
+
+NOTE: npm run test creates a container with a new database everytime it is called. 
 		
-
-	<Note: if you make tests that change sql data (eg: register, delete note, insert notes) and need to reset test db>
-
-	npm run reset-psql
-
 ## Documentation 
 
 ### /api/user : 
