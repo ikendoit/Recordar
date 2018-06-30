@@ -1,4 +1,5 @@
 const escaper = require("lodash").escape;
+const validate = require("validate.js");
 
 let validationConstraint = {}
 
@@ -8,18 +9,22 @@ let validationConstraint = {}
 		key: value
 					constraints: {}
 		key: ["<constraint1>", "<constraint2>",...]
+  @return boolean: if all value are valid
 */
-exports.checkContraints = (objectToCheck, contraints) => {
+exports.checkConstraints = (objectToCheck, constraints) => {
 	for (let key of Object.keys(constraints)){
-		if ( ! isValidConstraint(objectToCheck[key], contraints[key])){
-			return false
+		if ( ! isValidConstraint(objectToCheck[key], constraints[key])){
+			return false 
 		}
 	}
+  return true;
 }
 
 /*
 	check if a value match a constraint
-	value: value to check for constraint
+	@param: value: value to check for constraint
+  @return: boolean: false if invalid value
+  NOTES: 
 	summary of constraints: []
 		less_than <num>
 		more_than <num>
@@ -83,6 +88,7 @@ function isValidConstraint (value, constraints){
 			case "no_special": 
 				if (/[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value))
 					return false;
+        continue;
 			case "is_string": 
 				if ( typeof value === "string" )
 					continue
@@ -90,11 +96,18 @@ function isValidConstraint (value, constraints){
 			case "is_number": 
 				if ( typeof value === "number" )
 					continue
+          break;
 				return false;
+      case "is_email": 
+        if (/[a-zA-Z0-9]+\@\w+\.\w+/.test(value))
+          continue;   
+        return false
 			default: 
 				continue
 		}
 
 	}
+
+  return true;
 
 }

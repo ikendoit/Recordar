@@ -68,6 +68,7 @@ function summarize(notes){
 exports.get_all_notes_graphql = async (arg, db) => {
 
 	try {
+		console.log("getting all notes");
 		validateKeys(["id"], arg);
 		return await db.any("select a.*, c.cat_name from categories_act a, categories c where c.cat_id=a.cat_id and c.user_id=a.user_id and c.user_id ='"+arg.id+"'")
 			.then((resJSON) => {

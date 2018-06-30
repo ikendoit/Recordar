@@ -9,4 +9,5 @@ RUN npm install
 RUN npm install -g nodemon
 EXPOSE 8089 
 
-CMD ["npm","start"]
+ENTRYPOINT npm start
+

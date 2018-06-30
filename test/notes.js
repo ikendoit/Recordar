@@ -92,7 +92,7 @@ describe("NOTES TESTING", ()=>{
 
 	});
 
-	describe.only("MUTATION", ()=>{
+	describe("MUTATION", ()=>{
 		let validNotes = [
 				{
 					"cat_id": "AA844",

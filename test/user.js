@@ -69,6 +69,21 @@ describe("USER TESTING", ()=>{
 
 		});
 
+		it('Mock main /api/user/login, POST correct, should return 200', (done)=> {
+
+			return apiTest({
+				method: "post",
+				route: "/api/user/login", 
+				body: {
+					username: "test1",
+					password: "test1"
+				},
+				code: 200, 
+			},done);
+
+		});
+
+
 
 	});
 
@@ -143,6 +158,23 @@ describe("USER TESTING", ()=>{
 			},done);
 
 		});
+
+		it('Mock main /api/user/register, valid post should return new user info + 200 ', (done)=> {
+
+			apiTest({
+				method: "post",
+				route: "/api/user/register", 
+				body: {
+					username: "testNewTest",
+					password: "aTestOfTime",
+					email : "joe@gmail.com" ,
+					name : "boon ba boom"
+				},
+				code: 200, 
+			},done);
+
+		});
+
 
 
 	});

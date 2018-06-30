@@ -25,7 +25,7 @@ This is the back-end for Recordar. Please Check for ReactJS version and React-Na
 	npm run test
 		
 
-	<Note: if you make tests that change sql data:>
+	<Note: if you make tests that change sql data (eg: register, delete note, insert notes) and need to reset test db>
 
 	npm run reset-psql
 
